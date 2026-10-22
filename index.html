@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f1e4">
+  <meta name="description" content="La Fontana Italian Takeaway, Thames Ditton. Discover our hand-prepared pizzas, authentic Italian dishes and freshly made food.">
+  <title>La Fontana — Good Food, Real Italian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#pizzas">Skip to pizzas</a>
+  <div class="site-shell" id="top">
+    <header class="site-header" id="site-header">
+      <a class="brand" href="#top" aria-label="La Fontana — home">
+        <span class="brand-name">LA FONTANA</span>
+        <span class="brand-line"><i></i>ITALIAN TAKEAWAY<i></i></span>
+        <span class="flag-bars" aria-hidden="true"><b></b><b></b><b></b></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#top" class="nav-active">Home</a>
+        <a href="#pizzas">Our pizzas</a>
+        <a href="#our-story">Our story</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="header-call" href="tel:+447719663540" aria-label="Call to preorder">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 16.9-4.5-2c-.7-.3-1.5-.1-2 .5l-1.7 2.1a16 16 0 0 1-7.3-7.3l2.1-1.7c.6-.5.8-1.3.5-2L7.1 2a2 2 0 0 0-2.2-1L2.5 1.6A2 2 0 0 0 1 3.6 19.4 19.4 0 0 0 20.4 23a2 2 0 0 0 2-1.5l.6-2.4a2 2 0 0 0-1-2.2Z"/></svg>
+          <span>Pre-order</span>
+        </a>
+        <button class="cart-launch" id="cart-launch" type="button" aria-label="Open basket">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l-1 14H6L5 7ZM9 9V6a3 3 0 0 1 6 0v3"/></svg>
+          <span id="cart-total">£0.00</span><span class="cart-count" id="cart-count" hidden>0</span>
+        </button>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav" type="button">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>
+        <a href="#top">Home</a><a href="#pizzas">Our pizzas</a><a href="#our-story">Our story</a><a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-photo" role="img" aria-label="La Fontana Italian takeaway, cream facade and dark green trim at dusk"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">AUTHENTIC ITALIAN FLAVOURS</p>
+          <h1 id="hero-title">Good Food,<br>Real Italian.</h1>
+          <span class="italian-bars" aria-hidden="true"><b></b><b></b><b></b></span>
+          <p class="hero-summary">Freshly made pizzas, Italian favourites and traditional recipes. Good food, made with care.</p>
+          <div class="hero-buttons">
+            <a class="button button-primary" href="#pizzas">Explore our pizzas <span aria-hidden="true">→</span></a>
+            <a class="button button-outline" href="#contact">Pre-order by phone</a>
+          </div>
+          <span class="hero-location">53a High Street · Thames Ditton</span>
+        </div>
+      </section>
+
+      <section class="pizza-section" id="pizzas" aria-labelledby="pizza-heading">
+        <img class="ingredient ingredient-left" src="assets/ingredients-left.png" alt="" loading="lazy">
+        <img class="ingredient ingredient-right" src="assets/ingredients-right.png" alt="" loading="lazy">
+        <div class="section-heading">
+          <div class="section-eyebrow"><span></span> OUR PIZZAS <span></span></div>
+          <h2 id="pizza-heading">A Pizza for Every Mood</h2>
+          <p>Discover the real menu of La Fontana, freshly prepared for you.</p>
+        </div>
+        <div class="showcase">
+          <div class="pizza-left">
+            <div class="pizza-stage" aria-label="Interactive pizza selector">
+              <div class="pizza-disc" id="pizza-disc" role="img" aria-label="La Fontana pizza with Parma ham, parmesan and rocket">
+                <div class="pizza-photo"></div>
+              </div>
+              <svg class="arc-track" aria-hidden="true">
+                <defs><path id="arc-name-path"/></defs>
+                <path id="arc-path" fill="none" stroke="rgba(16,60,47,.42)" stroke-width="1.25"/>
+                <g id="arc-dots"></g>
+                <g id="arc-names"></g>
+              </svg>
+              <div id="arc-labels" class="arc-labels" aria-label="Nearby pizzas"></div>
+              <button class="ring-arrow ring-arrow-left" id="ring-prev" aria-label="Previous pizza" title="Previous pizza" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+              </button>
+              <button class="ring-arrow ring-arrow-right" id="ring-next" aria-label="Next pizza" title="Next pizza" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="gallery-wrap">
+              <div class="pizza-gallery" id="pizza-gallery" aria-label="All pizzas on our menu"></div>
+            </div>
+            <p class="selection-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 3 10l5 5M16 5l5 5-5 5M12 3v18"/></svg> Choose a pizza below or use the arrows to explore</p>
+          </div>
+          <aside class="pizza-details" aria-live="polite" aria-atomic="true">
+            <div class="details-top"><p class="eyebrow">SELECTED PIZZA</p><span class="details-number" id="details-number">09 / 15</span></div>
+            <div class="pizza-name-price"><h3 id="pizza-name">La Fontana</h3><strong id="pizza-price">£15.50</strong></div>
+            <p class="pizza-description" id="pizza-description">Tomato sauce, mozzarella, Parma ham, Parmesan, fresh rocket</p>
+            <p class="ingredient-title">INGREDIENTS</p>
+            <div class="ingredient-list" id="ingredient-list"></div>
+            <div class="details-divider"></div>
+            <div class="order-toolbar"><span>Quantity</span><div class="quantity-stepper"><button id="qty-minus" type="button" aria-label="Decrease quantity">−</button><output id="quantity" aria-live="polite">1</output><button id="qty-plus" type="button" aria-label="Increase quantity">+</button></div></div>
+            <button class="button button-primary add-button" id="add-to-basket" type="button"><span>Add to basket</span><span id="add-price">£15.50</span></button>
+            <p class="order-footnote">Pre-order by phone. Online payment is not yet enabled.</p>
+          </aside>
+        </div>
+      </section>
+
+      <div class="promise-strip" aria-label="Why choose La Fontana">
+        <div class="promise">
+          <div class="promise-icon"><svg viewBox="0 0 32 32"><path d="M25 6C14 6 7 10 7 20c0 4 3 6 7 6 9 0 13-10 11-20ZM9 24l12-12"/></svg></div><div><strong>Freshly Made</strong><span>Fresh ingredients, real flavour.</span></div>
+        </div>
+        <div class="promise">
+          <div class="promise-icon"><svg viewBox="0 0 32 32"><path d="M4 24 17 4c7 3 11 9 11 20H4Zm9-7h.01M19 22h.01M17 11h.01"/></svg></div><div><strong>Authentic Italian</strong><span>Traditional favourites and more.</span></div>
+        </div>
+        <div class="promise">
+          <div class="promise-icon"><svg viewBox="0 0 32 32"><circle cx="9" cy="24" r="3"/><circle cx="25" cy="24" r="3"/><path d="M9 24h8l-4-10h6l6 10M16 9h5M14 8h3"/></svg></div><div><strong>Pre-order & Collect</strong><span>Call ahead for your favourites.</span></div>
+        </div>
+        <div class="promise">
+          <div class="promise-icon"><svg viewBox="0 0 32 32"><path d="M16 28 5 17C-1 9 11 2 16 10c5-8 17-1 11 7Z"/></svg></div><div><strong>Made with Care</strong><span>Good food, real Italian.</span></div>
+        </div>
+      </div>
+
+      <section class="story-section" id="our-story">
+        <div class="story-photo" role="img" aria-label="La Fontana storefront"></div>
+        <div class="story-text"><p class="eyebrow">LA FONTANA · THAMES DITTON</p><h2>Something good<br>is always cooking.</h2><p>From pizza and garlic bread to homemade Italian favourites, explore the dishes at La Fontana and call ahead to pre-order.</p><a href="#contact" class="text-link">Get in touch <span aria-hidden="true">↗</span></a></div>
+      </section>
+    </main>
+
+    <footer id="contact" class="site-footer">
+      <div><span class="footer-brand">LA FONTANA</span><span>ITALIAN TAKEAWAY</span></div>
+      <div><small>FIND US</small><p>53a High Street<br>Thames Ditton, KT7 0SF</p></div>
+      <div><small>PRE-ORDER</small><p><a href="tel:+447719663540">07719 663 540</a></p></div>
+      <div><small>OPENING HOURS SHOWN ON THE MENU</small><p>Thursday – Saturday<br>17:00 – 21:00</p></div>
+    </footer>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="basket-drawer" id="basket-drawer" role="dialog" aria-modal="true" aria-labelledby="basket-heading" aria-hidden="true" inert>
+    <div class="drawer-header"><div><p class="eyebrow">LA FONTANA</p><h2 id="basket-heading">Your basket</h2></div><button type="button" class="icon-btn" id="close-basket" aria-label="Close basket">×</button></div>
+    <div class="basket-items" id="basket-items"></div>
+    <div class="basket-bottom"><div class="basket-sum"><span>Estimated total</span><strong id="basket-sum">£0.00</strong></div><p>Demo basket only — checkout and payment require integration.</p><button class="button button-primary copy-order" id="copy-order" type="button">Copy order for pre-order</button><a href="tel:+447719663540" class="button button-outline call-order">Call 07719 663 540</a></div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
