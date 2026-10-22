@@ -35,13 +35,14 @@ const arcDots = $('#arc-dots');
 const arcNames = $('#arc-names');
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-let selectedIndex = 8;
+let selectedIndex = 0;
 let quantity = 1;
 let basket = [];
 let toastTimer = null;
 // pos eases towards target; both are unwrapped so the ring can keep turning past the last pizza.
 const ring = { items:[], geo:null, pos:selectedIndex, target:selectedIndex, anim:null, raf:0 };
 const preloaded = new Set();
+let pizzaScroll = null;
 
 try {
   const raw = JSON.parse(localStorage.getItem('la_fontana_demo_cart') || '[]');
@@ -202,6 +203,7 @@ function showPizzaPhoto(index) {
   const previous=[...disc.children];
   const layer=document.createElement('div');
   layer.className='pizza-photo';
+  layer.dataset.pizza=pizzas[index].id;
   layer.dataset.pos=String(ring.target);
   layer.style.backgroundImage=`url("${makeImagePath(pizzas[index],true)}")`;
   if (reducedMotion.matches) {
@@ -254,18 +256,113 @@ function renderDetails() {
     card.setAttribute('aria-pressed',String(i===selectedIndex));
   });
 }
-function selectPizza(nextIndex) {
+function stabilizePizzaDetails() {
+  const details=$('.pizza-details');
+  const probe=details.cloneNode(true);
+  probe.removeAttribute('aria-live');
+  probe.setAttribute('aria-hidden','true');
+  probe.inert=true;
+  probe.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+  Object.assign(probe.style,{
+    position:'absolute',left:'-10000px',top:'0',visibility:'hidden',
+    width:`${details.getBoundingClientRect().width}px`
+  });
+  const selectors=['.pizza-name-price','.pizza-description','.ingredient-list'];
+  const blocks=selectors.map(selector=>probe.querySelector(selector));
+  blocks.forEach(block=>block.style.minHeight='0');
+  details.after(probe);
+  const heights=blocks.map(()=>0);
+  pizzas.forEach(pizza=>{
+    probe.querySelector('h3').textContent=pizza.name;
+    probe.querySelector('.pizza-name-price strong').textContent=GBP.format(pizza.price);
+    blocks[1].textContent=describePizza(pizza);
+    blocks[2].replaceChildren(...pizza.ingredients.map(name=>{
+      const chip=document.createElement('span');
+      chip.className='ingredient-chip';chip.textContent=name;
+      return chip;
+    }));
+    blocks.forEach((block,index)=>{
+      heights[index]=Math.max(heights[index],Math.ceil(block.getBoundingClientRect().height));
+    });
+  });
+  probe.remove();
+  selectors.forEach((selector,index)=>{
+    details.querySelector(selector).style.minHeight=`${heights[index]}px`;
+  });
+}
+function selectPizza(nextIndex,fromScroll=false) {
   const index=modulo(nextIndex,pizzas.length);
+  if (!fromScroll && pizzaScroll) pizzaScroll.goTo(index);
   if (index===selectedIndex) return;
   // Turn the shortest way round, so the ring wraps from the last pizza to the first.
   let delta=modulo(index-selectedIndex,pizzas.length);
-  if (delta>pizzas.length/2) delta-=pizzas.length;
+  if (!fromScroll && delta>pizzas.length/2) delta-=pizzas.length;
+  if (fromScroll) delta=index-selectedIndex;
   selectedIndex=index;quantity=1;
   renderDetails();
   ring.target+=delta;
   showPizzaPhoto(index);
   animateRing();
   preloadAround(index);
+}
+function initPizzaScroll() {
+  const track=$('.pizza-left');
+  const section=$('#pizzas');
+  const heading=section.querySelector('.section-heading');
+  const panel=document.createElement('div');
+  panel.className='pizza-scroll-panel';
+  panel.append(...track.childNodes);
+  track.append(panel);
+  document.documentElement.classList.add('pizza-scroll-enabled');
+  let start=0,step=1,end=0,frame=0,wasActive=false;
+  const update=()=>{
+    frame=0;
+    const y=window.scrollY;
+    const active=y>=start && y<=end;
+    if (active || wasActive) {
+      const index=Math.max(0,Math.min(pizzas.length-1,Math.floor((y-start)/step)));
+      selectPizza(index,true);
+    }
+    wasActive=active;
+  };
+  const schedule=()=>{
+    if (!frame) frame=requestAnimationFrame(update);
+  };
+  const measure=()=>{
+    const headingHeight=heading.offsetHeight;
+    section.style.setProperty('--pizza-heading-height',`${headingHeight}px`);
+    const hint=panel.querySelector('.selection-hint');
+    const hintStyle=getComputedStyle(hint);
+    const top=window.innerWidth<=590?58:70;
+    const available=window.innerHeight-24-headingHeight-gallery.parentElement.offsetHeight
+      -hint.offsetHeight-parseFloat(hintStyle.marginTop)-parseFloat(hintStyle.marginBottom);
+    const maxDiameter=window.innerWidth>=1600?870:810;
+    const diameter=Math.max(1,Math.min(track.clientWidth*(window.innerWidth<=590?.86:.94),
+      maxDiameter,(available-top)/.58));
+    section.style.setProperty('--pizza-disc-size',`${diameter}px`);
+    section.style.setProperty('--pizza-stage-height',`${top+diameter*.58}px`);
+    step=Math.max(160,window.innerHeight*.4);
+    const distance=step*pizzas.length;
+    track.style.height=`${panel.offsetHeight+distance}px`;
+    start=track.getBoundingClientRect().top+window.scrollY-12-headingHeight;
+    end=start+distance;
+    schedule();
+  };
+  pizzaScroll={
+    goTo(index){
+      if (window.scrollY<start || window.scrollY>end) return;
+      window.scrollTo({top:start+(index+.5)*step,behavior:'instant'});
+    }
+  };
+  window.addEventListener('scroll',schedule,{passive:true});
+  window.addEventListener('resize',measure);
+  if ('ResizeObserver' in window) {
+    const observer=new ResizeObserver(measure);
+    observer.observe(panel);
+    observer.observe(heading);
+    observer.observe(gallery);
+  }
+  measure();
 }
 function showToast(text) {
   const el=$('#toast');el.textContent=text;el.classList.add('show');
@@ -322,9 +419,24 @@ function fallbackCopy(text){
 }
 function init(){
   const photo=disc.firstElementChild;
+  photo.dataset.pizza=pizzas[selectedIndex].id;
   photo.dataset.pos=String(ring.pos);
   photo.style.backgroundImage=`url("${makeImagePath(pizzas[selectedIndex],true)}")`;
   renderGallery();buildRing();layoutRing();renderDetails();updateBasket();
+  initPizzaScroll();
+  stabilizePizzaDetails();
+  window.addEventListener('resize',stabilizePizzaDetails);
+  if ('ResizeObserver' in window) {
+    let width=0;
+    const observer=new ResizeObserver(entries=>{
+      const nextWidth=entries[0].contentRect.width;
+      if (nextWidth===width) return;
+      width=nextWidth;
+      stabilizePizzaDetails();
+    });
+    observer.observe($('.pizza-details'));
+  }
+  document.fonts?.ready.then(stabilizePizzaDetails);
   preloadAround(selectedIndex);
   if('ResizeObserver' in window){const ro=new ResizeObserver(()=>layoutRing());ro.observe(stage);ro.observe(disc);}
   else window.addEventListener('resize',layoutRing);

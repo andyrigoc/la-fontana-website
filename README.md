@@ -27,10 +27,13 @@ Then visit `http://localhost:8000`.
 - Pizza names written along the curved rail above the pizza (SVG text on a path), each with its dot on the line; 7 visible on wide screens, 5 on mid-size screens and 3 on small phones (never overlapping the arrows)
 - Changing pizza turns the ring: the outgoing pizza turns away around its centre while the new one turns in (24° per step) and cross-fades over it, always settling upright; arrows, names, gallery cards and keyboard arrows all scroll through every item
 - Top-down pizza photos as transparent cut-outs with a soft shadow (no plate or painted edge)
+- The scroll presentation crops round pizzas at 58% of their diameter; sizing adapts to the viewport and available space above the thumbnail grid without stretching photos.
 - All 15 cards in a two-row desktop grid, four-column mobile grid
 - Product details, quantity selector, demo basket saved in localStorage
+- Product name, description and ingredients reserve the maximum measured height across all pizzas at the current width, keeping the Add to basket button stationary as selection changes.
 - Copyable pre-order summary and click-to-call number
 - Keyboard controls, semantic buttons and reduced-motion support
+- Bidirectional scroll-through menu: pinning starts at the OUR PIZZAS heading, which stays visible above the presentation while scrolling from Margherita to Capricciosa, then releases into the rest of the page. Native scrolling works with touch, mouse and keyboard; direct selection stays synchronized while pinned. All thumbnails stay visible in a multi-row grid, including on mobile; the presentation fills the viewport without an empty area below the grid. Reduced motion disables rotation and cross-fading without disabling selection.
 
 ## Next steps / production limitations
 

@@ -42,7 +42,7 @@ img{max-width:100%}[hidden]{display:none!important}
 /* Pizza photos are transparent square cut-outs centred on the pizza: no plate or painted edge, just a soft shadow.
    Each photo is its own layer, so it can turn and cross-fade independently (see showPizzaPhoto in app.js). */
 .pizza-disc{position:absolute;z-index:1;left:50%;top:70px;transform:translateX(-50%);width:min(94%,810px);aspect-ratio:1/1;filter:drop-shadow(0 18px 24px rgba(70,40,12,.22))}
-.pizza-photo{position:absolute;inset:0;background:url('assets/fontana-feature.webp') center/contain no-repeat;border-radius:50%;transition:opacity .7s ease;will-change:transform,opacity}
+.pizza-photo{position:absolute;inset:0;background:url('assets/margherita-feature.webp') center/contain no-repeat;border-radius:50%;transition:opacity .7s ease;will-change:transform,opacity}
 .pizza-photo.is-leaving{opacity:0;transition:opacity .35s ease .4s}
 .arc-track,.arc-labels{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}.arc-track{overflow:visible}.arc-labels{pointer-events:none}
 .arc-name{font-family:var(--sans);font-weight:600;fill:#31443b}.arc-name.active{font-weight:700;fill:#002f21}
@@ -69,7 +69,25 @@ img{max-width:100%}[hidden]{display:none!important}
 @media(max-width:1160px){.pizza-stage.calzone-selected{height:435px}}
 @media(max-width:860px){.pizza-stage.calzone-selected{height:440px}}
 @media(max-width:590px){.pizza-stage.calzone-selected{height:255px}}
-.pizza-stage.calzone-selected .pizza-photo{background-size:115% auto;background-position:center 35px}
+.pizza-photo[data-pizza="calzone"]{background-size:115% auto;background-position:center 35px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* Keep navigation legible over the photograph without a hard visual cut */
 .site-header{background:linear-gradient(90deg,rgba(248,241,228,.87),rgba(248,241,228,.83));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding-inline:16px;border-radius:0 0 13px 13px}
+.pizza-scroll-enabled .site-shell{overflow:clip}
+.pizza-scroll-enabled .pizza-section{overflow-anchor:none}
+.pizza-scroll-enabled .pizza-section>.section-heading{position:sticky;top:12px;z-index:12;background:var(--cream)}
+.pizza-scroll-panel{position:sticky;top:calc(12px + var(--pizza-heading-height,0px));display:flex;flex-direction:column}
+.pizza-scroll-enabled .pizza-stage{height:var(--pizza-stage-height,300px);flex:none}
+.pizza-scroll-enabled .pizza-disc{width:var(--pizza-disc-size,94%)}
+.pizza-scroll-enabled .gallery-wrap{flex:none}
+.pizza-scroll-enabled .selection-hint{flex:none}
+.pizza-scroll-enabled .pizza-details{position:sticky;top:calc(12px + var(--pizza-heading-height,0px))}
+@media(max-width:860px){
+  .pizza-scroll-enabled .pizza-gallery{display:grid;overflow:visible}
+  .pizza-scroll-enabled .pizza-details{position:relative;top:auto}
+}
+@media(max-width:590px){
+  .pizza-scroll-enabled .pizza-card{min-height:0}
+  .pizza-scroll-enabled .pizza-card img{height:clamp(28px,5.5svh,44px)}
+  .pizza-scroll-enabled .selection-hint{margin:8px 0 0}
+}
