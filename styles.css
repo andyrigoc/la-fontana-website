@@ -56,6 +56,28 @@ img{max-width:100%}[hidden]{display:none!important}
 .pizza-name-price{display:flex;gap:12px;align-items:start;justify-content:space-between;margin:10px 0 9px}.pizza-name-price h3{font:700 35px/1.15 var(--serif);letter-spacing:-1px;margin:0;max-width:230px}.pizza-name-price strong{font:700 21px/1.35 var(--serif);white-space:nowrap;color:#25251c}
 .pizza-description{font-size:13px;color:#5d625c;line-height:1.65;margin:0;min-height:63px}.ingredient-title{font-size:10px;letter-spacing:2px;font-weight:700;margin:20px 0 12px;color:#6c756c}.ingredient-list{display:flex;flex-wrap:wrap;gap:7px}
 .ingredient-chip{padding:8px 10px;background:rgba(255,255,255,.55);border:1px solid rgba(37,74,47,.13);border-radius:7px;font-size:11px;color:#3f5549}.details-divider{height:1px;background:var(--border);margin:23px 0 21px}.order-toolbar{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:19px}.quantity-stepper{display:flex;align-items:center;border:1px solid rgba(44,68,56,.22);height:43px;border-radius:9px}.quantity-stepper button{width:36px;height:100%;border:0;background:transparent;font-size:19px;color:var(--forest)}.quantity-stepper output{min-width:28px;text-align:center;font-weight:700;font-size:14px}.add-button{width:100%;justify-content:space-between}.order-footnote{font-size:10px;line-height:1.55;color:#819085;margin:12px 0 0}
+.ingredient-title{display:flex;align-items:center;justify-content:space-between;min-height:24px}
+.ingredient-list{align-items:flex-start;align-content:flex-start}
+.ingredient-list .ingredient-chip{position:relative;display:inline-flex;align-items:center;min-height:38px;max-width:100%;padding:9px 34px 9px 11px;line-height:1.5}
+.ingredient-remove{position:absolute;top:2px;right:2px;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:5px;background:transparent;color:var(--forest);font-size:20px;line-height:1;cursor:pointer}
+.ingredient-remove:hover{background:rgba(198,87,57,.12);color:#9c3925}
+.reset-ingredients{border:0;background:transparent;color:var(--forest);font:inherit;font-size:11px;letter-spacing:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
+.ingredients-empty{font-size:12px;color:#68786e;line-height:1.5}
+.topping-picker{position:relative;margin-bottom:12px}
+.topping-button{width:100%;list-style:none;cursor:pointer;gap:10px}
+.topping-button::-webkit-details-marker{display:none}
+.topping-button #topping-summary{margin-left:auto;font-size:11px;font-weight:400}
+.topping-chevron{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);flex:none}
+.topping-picker[open] .topping-chevron{transform:rotate(225deg)}
+.topping-panel{position:absolute;z-index:15;bottom:calc(100% + 8px);left:0;width:100%;max-height:min(360px,60svh);overflow-y:auto;overscroll-behavior:contain;background:#fffaf1;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:16px}
+.topping-picker.opens-below .topping-panel{top:calc(100% + 8px);bottom:auto}
+.topping-panel h4{margin:0 0 6px;font:700 22px var(--serif)}
+.topping-panel>p{margin:0 0 12px;font-size:11px;line-height:1.5;color:#68786e}
+.topping-row{display:grid;grid-template-columns:minmax(0,1fr) 58px auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:12px}
+.topping-row label{cursor:pointer;line-height:1.4}
+.topping-row select{width:58px;min-height:36px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--forest);font:inherit;padding:4px}
+.topping-row.is-selected select{background:var(--forest);color:#fff}
+.topping-price{font-size:11px;font-weight:700}
 .promise-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:1450px;margin:25px auto 0;padding:20px 34px 27px;border-top:1px solid var(--border)}.promise{display:flex;align-items:center;gap:12px;border-right:1px solid var(--border);padding:0 10px}.promise:last-child{border:0}.promise-icon{width:47px;height:47px;border:1.5px solid #284436;border-radius:50%;display:grid;place-items:center;flex:none}.promise-icon svg{width:24px;height:24px;fill:none;stroke:#284436;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}.promise strong{display:block;font:700 16px/1.4 var(--serif);white-space:nowrap}.promise span{display:block;font-size:11px;color:#748177;line-height:1.6}
 .story-section{display:grid;grid-template-columns:1fr 1fr;background:#e9ddca;margin-top:30px;min-height:340px}.story-photo{background:url('assets/storefront.webp') center center/cover}.story-text{padding:60px clamp(35px,6vw,95px)}.story-text h2{font:700 clamp(30px,4vw,49px)/1.2 var(--serif);letter-spacing:-1px;margin:8px 0 16px;color:var(--forest-dark)}.story-text>p:not(.eyebrow){color:#4e5d4e;line-height:1.75;font-size:14px;max-width:455px}.text-link{font-weight:700;font-size:13px;color:var(--forest);display:inline-block;border-bottom:1px solid currentColor;padding-bottom:7px;margin-top:12px}.text-link span{margin-left:15px}
 .site-footer{background:#062d21;color:#f9f2e5;display:grid;grid-template-columns:1.3fr 1fr 1fr 1.1fr;gap:30px;padding:52px clamp(28px,6.5vw,120px)}.site-footer>div:first-child{display:flex;flex-direction:column;gap:6px;font-size:11px;letter-spacing:2px}.footer-brand{font:700 32px var(--serif);letter-spacing:-1px}.site-footer small{font-size:10px;font-weight:700;letter-spacing:2px;color:#a5c4b2}.site-footer p{font-size:13px;line-height:1.8;margin:11px 0 0}.site-footer a{text-decoration:underline;text-underline-offset:3px}
@@ -70,6 +92,11 @@ img{max-width:100%}[hidden]{display:none!important}
 @media(max-width:860px){.pizza-stage.calzone-selected{height:440px}}
 @media(max-width:590px){.pizza-stage.calzone-selected{height:255px}}
 .pizza-photo[data-pizza="calzone"]{background-size:115% auto;background-position:center 35px}
+@media(min-width:591px) and (max-width:860px){
+  .topping-picker{grid-column:2;grid-row:3;align-self:start;margin-top:12px}
+  .pizza-details .add-button{grid-row:4;align-self:start}
+  .pizza-details .order-footnote{grid-row:5}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* Keep navigation legible over the photograph without a hard visual cut */
 .site-header{background:linear-gradient(90deg,rgba(248,241,228,.87),rgba(248,241,228,.83));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding-inline:16px;border-radius:0 0 13px 13px}

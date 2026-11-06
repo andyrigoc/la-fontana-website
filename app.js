@@ -1,7 +1,8 @@
 /**
  * LA FONTANA — lightweight, framework-free front end.
  * Motion integration point: animateRing() and showPizzaPhoto().
- * All prices and ingredients below are transcribed from the supplied menu.
+ * Pizza prices and ingredients are transcribed from the supplied menu.
+ * Optional toppings and their prices follow the confirmed reference.
  * IMPORTANT: demo basket does not process payments or transmit orders.
  */
 const pizzas = [
@@ -22,6 +23,23 @@ const pizzas = [
   { id:'capricciosa', name:'Capricciosa', price:15.50, ingredients:['Ham','Mushrooms','Artichoke','Olives','Tomato sauce','Mozzarella'] }
 ];
 
+const toppings = [
+  'Extra Cheese','Black Olives','Fresh Chilli','Marinated Paneer Tikka',
+  'Pineapple','Spring Onion','Bacon','Pepperoni','Spicy Pork',
+  'Chinese Chicken','Plain Chicken','Anchovies'
+];
+const toppingPrice = 1;
+const emptyToppings = () => toppings.map(()=>0);
+const validToppings = selection => Array.isArray(selection) && selection.length===toppings.length &&
+  selection.every(qty=>Number.isInteger(qty) && qty>=0 && qty<=2);
+const toppingTotal = selection => selection.reduce((sum,qty)=>sum+qty*toppingPrice,0);
+const toppingDescription = selection => selection.flatMap((qty,index)=>qty ? [`${toppings[index]} x${qty}`] : []).join(', ');
+const itemUnitPrice = item => pizzas[item.index].price+toppingTotal(item.toppings);
+const validRemovedIngredients = item => Array.isArray(item.removedIngredients) &&
+  new Set(item.removedIngredients).size===item.removedIngredients.length &&
+  item.removedIngredients.every(index=>Number.isInteger(index) && index>=0 && index<pizzas[item.index].ingredients.length);
+const removedIngredientDescription = item => item.removedIngredients.map(index=>pizzas[item.index].ingredients[index]).join(', ');
+
 const GBP = new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'});
 const $ = (sel) => document.querySelector(sel);
 const modulo = (n,m) => ((n % m) + m) % m;
@@ -37,6 +55,8 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let selectedIndex = 0;
 let quantity = 1;
+let selectedToppings = emptyToppings();
+let removedIngredients = [];
 let basket = [];
 let toastTimer = null;
 // pos eases towards target; both are unwrapped so the ring can keep turning past the last pizza.
@@ -46,7 +66,13 @@ let pizzaScroll = null;
 
 try {
   const raw = JSON.parse(localStorage.getItem('la_fontana_demo_cart') || '[]');
-  if (Array.isArray(raw)) basket = raw.filter(item => Number.isInteger(item.index) && item.index >= 0 && item.index < pizzas.length && Number.isInteger(item.qty) && item.qty > 0);
+  if (Array.isArray(raw)) {
+    basket = raw.filter(item => item && Number.isInteger(item.index) && item.index >= 0 && item.index < pizzas.length &&
+      Number.isInteger(item.qty) && item.qty > 0 && (item.toppings===undefined || validToppings(item.toppings)) &&
+      (item.removedIngredients===undefined || validRemovedIngredients(item)))
+      .map(item=>({...item,toppings:item.toppings ?? emptyToppings(),removedIngredients:[...(item.removedIngredients ?? [])].sort((a,b)=>a-b)}));
+    if (basket.length!==raw.length) console.warn('Invalid saved basket items were discarded.');
+  }
 } catch (_) { basket = []; }
 
 function makeImagePath(pizza, large=false) {
@@ -233,23 +259,79 @@ function preloadAround(index) {
     const img=new Image();img.decoding='async';img.src=src;
   });
 }
-function describePizza(p) {
-  const joined=p.ingredients.join(', ');
+function describePizza(p,removed=[]) {
+  const joined=p.ingredients.filter((name,index)=>!removed.includes(index)).join(', ');
+  if(!joined)return 'No base ingredients selected.';
   return p.note ? `${p.note.toLowerCase()} ${joined.charAt(0).toLowerCase()}${joined.slice(1)}.` : `${joined}.`;
+}
+function makeIngredientChip(name,index) {
+  const chip=document.createElement('span');chip.className='ingredient-chip';
+  const label=document.createElement('span');label.textContent=name;
+  const remove=document.createElement('button');remove.type='button';remove.className='ingredient-remove';
+  remove.setAttribute('aria-label',`Remove ingredient: ${name}`);
+  const icon=document.createElement('span');icon.textContent='×';icon.setAttribute('aria-hidden','true');remove.append(icon);
+  remove.addEventListener('click',()=>{
+    removedIngredients.push(index);
+    removedIngredients.sort((a,b)=>a-b);
+    renderDetails();
+    const next=$('#ingredient-list').querySelector('.ingredient-remove') || $('#reset-ingredients');
+    next.focus({preventScroll:true});
+    showToast(`${name} removed. Pizza price unchanged.`);
+  });
+  chip.append(label,remove);
+  return chip;
+}
+function renderToppings() {
+  const list=$('#topping-list');
+  toppings.forEach((name,index)=>{
+    const row=document.createElement('div');row.className='topping-row';
+    const label=document.createElement('label');label.htmlFor=`topping-${index}`;label.textContent=name;
+    const select=document.createElement('select');select.id=label.htmlFor;
+    ['No','x1','x2'].forEach((text,qty)=>{
+      const option=document.createElement('option');option.value=String(qty);option.textContent=text;select.append(option);
+    });
+    select.addEventListener('change',()=>{
+      selectedToppings[index]=Number(select.value);
+      updateToppingPrice();
+    });
+    const price=document.createElement('span');price.className='topping-price';price.textContent=GBP.format(toppingPrice);
+    row.append(label,select,price);list.append(row);
+  });
+}
+function positionToppingPanel() {
+  const picker=$('#topping-picker');
+  if(!picker.open)return;
+  const rect=picker.querySelector('summary').getBoundingClientRect();
+  const above=rect.top-16,below=window.innerHeight-rect.bottom-16;
+  picker.classList.toggle('opens-below',below>above);
+  picker.querySelector('.topping-panel').style.maxHeight=`${Math.max(0,Math.min(360,Math.max(above,below)))}px`;
+}
+function updateToppingPrice() {
+  const total=toppingTotal(selectedToppings);
+  $('#topping-summary').textContent=total ? `+${GBP.format(total)} / pizza` : 'Choose extras';
+  $('#add-price').textContent=GBP.format((pizzas[selectedIndex].price+total)*quantity);
+  $('#topping-list').querySelectorAll('select').forEach((select,index)=>{
+    select.value=String(selectedToppings[index]);
+    select.closest('.topping-row').classList.toggle('is-selected',selectedToppings[index]>0);
+  });
 }
 function renderDetails() {
   const p=pizzas[selectedIndex];
   stage.classList.toggle('calzone-selected',p.id==='calzone');
   $('#pizza-name').textContent=p.name;
   $('#pizza-price').textContent=GBP.format(p.price);
-  $('#pizza-description').textContent=describePizza(p);
+  $('#pizza-description').textContent=describePizza(p,removedIngredients);
   $('#details-number').textContent=`${String(selectedIndex+1).padStart(2,'0')} / ${pizzas.length}`;
   const list=$('#ingredient-list'); list.replaceChildren();
-  p.ingredients.forEach(name => {
-    const chip=document.createElement('span');chip.className='ingredient-chip';chip.textContent=name;list.append(chip);
+  p.ingredients.forEach((name,index) => {
+    if(!removedIngredients.includes(index))list.append(makeIngredientChip(name,index));
   });
+  if(!list.childElementCount){
+    const empty=document.createElement('span');empty.className='ingredients-empty';empty.textContent='All base ingredients removed.';list.append(empty);
+  }
+  $('#reset-ingredients').hidden=removedIngredients.length===0;
   $('#quantity').textContent=quantity;
-  $('#add-price').textContent=GBP.format(p.price*quantity);
+  updateToppingPrice();
   $('#pizza-disc').setAttribute('aria-label',`Illustrative overhead pizza image: ${p.name}`);
   gallery.querySelectorAll('.pizza-card').forEach((card,i)=>{
     card.classList.toggle('selected',i===selectedIndex);
@@ -276,11 +358,7 @@ function stabilizePizzaDetails() {
     probe.querySelector('h3').textContent=pizza.name;
     probe.querySelector('.pizza-name-price strong').textContent=GBP.format(pizza.price);
     blocks[1].textContent=describePizza(pizza);
-    blocks[2].replaceChildren(...pizza.ingredients.map(name=>{
-      const chip=document.createElement('span');
-      chip.className='ingredient-chip';chip.textContent=name;
-      return chip;
-    }));
+    blocks[2].replaceChildren(...pizza.ingredients.map(makeIngredientChip));
     blocks.forEach((block,index)=>{
       heights[index]=Math.max(heights[index],Math.ceil(block.getBoundingClientRect().height));
     });
@@ -298,7 +376,8 @@ function selectPizza(nextIndex,fromScroll=false) {
   let delta=modulo(index-selectedIndex,pizzas.length);
   if (!fromScroll && delta>pizzas.length/2) delta-=pizzas.length;
   if (fromScroll) delta=index-selectedIndex;
-  selectedIndex=index;quantity=1;
+  selectedIndex=index;quantity=1;selectedToppings=emptyToppings();removedIngredients=[];
+  $('#topping-picker').open=false;
   renderDetails();
   ring.target+=delta;
   showPizzaPhoto(index);
@@ -370,11 +449,12 @@ function showToast(text) {
   toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
 }
 function persistBasket() {
-  try{localStorage.setItem('la_fontana_demo_cart',JSON.stringify(basket));}catch(_){}
+  try{localStorage.setItem('la_fontana_demo_cart',JSON.stringify(basket));}
+  catch(error){console.error('Unable to save the demo basket.',error);showToast('Your basket could not be saved on this device.');}
 }
 function updateBasket() {
   let total=0,count=0;
-  basket.forEach(item=>{total+=pizzas[item.index].price*item.qty;count+=item.qty;});
+  basket.forEach(item=>{total+=itemUnitPrice(item)*item.qty;count+=item.qty;});
   $('#cart-total').textContent=GBP.format(total);
   $('#basket-sum').textContent=GBP.format(total);
   $('#cart-count').textContent=count;
@@ -388,11 +468,17 @@ function updateBasket() {
     const row=document.createElement('div');row.className='basket-row';
     const img=document.createElement('img');img.src=makeImagePath(p);img.alt='';
     const info=document.createElement('div');const title=document.createElement('strong');title.textContent=p.name;
-    const sub=document.createElement('small');sub.textContent=`Qty ${item.qty} · ${GBP.format(p.price)} each`;
+    const sub=document.createElement('small');sub.textContent=`Qty ${item.qty} · ${GBP.format(itemUnitPrice(item))} each`;
+    const extras=document.createElement('small');extras.textContent=toppingDescription(item.toppings);
+    const without=document.createElement('small');
+    if(item.removedIngredients.length)without.textContent=`Without: ${removedIngredientDescription(item)}`;
     const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.setAttribute('aria-label',`Remove ${p.name}`);
-    remove.addEventListener('click',()=>{basket=basket.filter(row=>row.index!==item.index);persistBasket();updateBasket();});
-    info.append(title,sub,remove);
-    const price=document.createElement('span');price.className='basket-row-price';price.textContent=GBP.format(p.price*item.qty);
+    remove.addEventListener('click',()=>{basket=basket.filter(row=>row!==item);updateBasket();});
+    info.append(title,sub);
+    if(extras.textContent)info.append(extras);
+    if(without.textContent)info.append(without);
+    info.append(remove);
+    const price=document.createElement('span');price.className='basket-row-price';price.textContent=GBP.format(itemUnitPrice(item)*item.qty);
     row.append(img,info,price);node.append(row);
   });
   $('#copy-order').disabled=basket.length===0;
@@ -408,7 +494,11 @@ function closeBasket(){
 }
 function copyOrder(){
   if(!basket.length)return;
-  const lines=['LA FONTANA — PRE-ORDER ENQUIRY',...basket.map(item=>`${item.qty} × ${pizzas[item.index].name} — ${GBP.format(item.qty*pizzas[item.index].price)}`),`Total: ${$('#basket-sum').textContent}`,'Please confirm availability and collection time.'];
+  const lines=['LA FONTANA — PRE-ORDER ENQUIRY',...basket.map(item=>{
+    const extras=toppingDescription(item.toppings);
+    const without=removedIngredientDescription(item);
+    return `${item.qty} × ${pizzas[item.index].name}${without ? ` (without: ${without})` : ''}${extras ? ` (extras per pizza: ${extras})` : ''} — ${GBP.format(item.qty*itemUnitPrice(item))}`;
+  }),`Total: ${$('#basket-sum').textContent}`,'Please confirm availability and collection time.'];
   const text=lines.join('\n');
   if(navigator.clipboard && window.isSecureContext){navigator.clipboard.writeText(text).then(()=>showToast('Order copied — call the restaurant to confirm.')).catch(()=>fallbackCopy(text));}
   else fallbackCopy(text);
@@ -422,7 +512,7 @@ function init(){
   photo.dataset.pizza=pizzas[selectedIndex].id;
   photo.dataset.pos=String(ring.pos);
   photo.style.backgroundImage=`url("${makeImagePath(pizzas[selectedIndex],true)}")`;
-  renderGallery();buildRing();layoutRing();renderDetails();updateBasket();
+  renderGallery();buildRing();layoutRing();renderToppings();renderDetails();updateBasket();
   initPizzaScroll();
   stabilizePizzaDetails();
   window.addEventListener('resize',stabilizePizzaDetails);
@@ -446,16 +536,34 @@ function init(){
   $('#ring-next').addEventListener('click',()=>selectPizza(selectedIndex+1));
   $('#qty-minus').addEventListener('click',()=>{quantity=Math.max(1,quantity-1);renderDetails();});
   $('#qty-plus').addEventListener('click',()=>{quantity=Math.min(30,quantity+1);renderDetails();});
+  $('#reset-ingredients').addEventListener('click',()=>{
+    removedIngredients=[];
+    renderDetails();
+    $('#ingredient-list .ingredient-remove').focus({preventScroll:true});
+    showToast('Original ingredients restored.');
+  });
   $('#add-to-basket').addEventListener('click',()=>{
-    const existing=basket.find(item=>item.index===selectedIndex);
-    if(existing)existing.qty+=quantity;else basket.push({index:selectedIndex,qty:quantity});
+    const existing=basket.find(item=>item.index===selectedIndex && item.toppings.every((qty,index)=>qty===selectedToppings[index]) &&
+      item.removedIngredients.length===removedIngredients.length && item.removedIngredients.every((ingredient,index)=>ingredient===removedIngredients[index]));
+    if(existing)existing.qty+=quantity;else basket.push({index:selectedIndex,qty:quantity,toppings:[...selectedToppings],removedIngredients:[...removedIngredients]});
+    $('#topping-picker').open=false;
     updateBasket();showToast(`${quantity} × ${pizzas[selectedIndex].name} added to your basket`);
   });
+  document.addEventListener('click',event=>{
+    if(!$('#topping-picker').contains(event.target))$('#topping-picker').open=false;
+  });
+  $('#topping-picker').addEventListener('toggle',positionToppingPanel);
+  window.addEventListener('resize',positionToppingPanel);
+  window.addEventListener('scroll',positionToppingPanel,{passive:true});
   $('#cart-launch').addEventListener('click',openBasket);
   $('#close-basket').addEventListener('click',closeBasket);
   $('#drawer-backdrop').addEventListener('click',closeBasket);
   $('#copy-order').addEventListener('click',copyOrder);
   document.addEventListener('keydown',event=>{
+    if(event.key==='Escape' && $('#topping-picker').open){
+      $('#topping-picker').open=false;
+      $('#topping-picker summary').focus({preventScroll:true});
+    }
     if(event.key==='Escape' && $('#basket-drawer').classList.contains('open'))closeBasket();
     if(['ArrowLeft','ArrowRight'].includes(event.key) && (document.activeElement?.closest('.pizza-stage') || document.activeElement?.closest('.pizza-gallery'))){
       event.preventDefault();

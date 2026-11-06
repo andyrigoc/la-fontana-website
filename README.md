@@ -30,6 +30,8 @@ Then visit `http://localhost:8000`.
 - The scroll presentation crops round pizzas at 58% of their diameter; sizing adapts to the viewport and available space above the thumbnail grid without stretching photos.
 - All 15 cards in a two-row desktop grid, four-column mobile grid
 - Product details, quantity selector, demo basket saved in localStorage
+- Compact ingredient boxes each have a top-right × to remove that base ingredient. Reset restores the original recipe; changing pizza resets removals. Removed ingredients disappear from the description and are recorded as "Without" in the saved basket and copied order. Different removal combinations stay separate, with no discount on the base pizza price.
+- A Topping dropdown above Add to basket offers the 12 confirmed reference extras, each at £1.00 per pizza with No / x1 / x2 choices. Extras update the button total and are included in saved basket lines and the copied pre-order summary. Different topping combinations stay separate; choosing another pizza resets extras.
 - Product name, description and ingredients reserve the maximum measured height across all pizzas at the current width, keeping the Add to basket button stationary as selection changes.
 - Copyable pre-order summary and click-to-call number
 - Keyboard controls, semantic buttons and reduced-motion support
@@ -43,6 +45,7 @@ Then visit `http://localhost:8000`.
 4. Basket is an interactive *front-end demo only*, not a live ecommerce checkout; payments, order transmission, customer accounts, stock and order dispatch must be built/connected separately.
 5. Confirm latest product prices, opening hours, allergen information, delivery/collection availability and contact details before launch. The supplied printed menu states pre-order phone `07719 663 540`, Thursday–Saturday 17:00–21:00, and `53a High Street, Thames Ditton KT7 0SF`.
 6. Google Fonts require an internet connection; robust fallback fonts are provided.
+7. The optional topping list and £1.00 supplement were confirmed from the reference, not the restaurant's printed menu. Confirm their availability and prices with La Fontana before launch.
 
 ## Design tokens
 

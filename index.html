@@ -98,10 +98,18 @@
             <div class="details-top"><p class="eyebrow">SELECTED PIZZA</p><span class="details-number" id="details-number">01 / 15</span></div>
             <div class="pizza-name-price"><h3 id="pizza-name">Margherita (V)</h3><strong id="pizza-price">£10.00</strong></div>
             <p class="pizza-description" id="pizza-description">Tomato sauce, Mozzarella.</p>
-            <p class="ingredient-title">INGREDIENTS</p>
+            <p class="ingredient-title">INGREDIENTS <button id="reset-ingredients" class="reset-ingredients" type="button" aria-label="Reset ingredients" hidden>Reset</button></p>
             <div class="ingredient-list" id="ingredient-list"></div>
             <div class="details-divider"></div>
             <div class="order-toolbar"><span>Quantity</span><div class="quantity-stepper"><button id="qty-minus" type="button" aria-label="Decrease quantity">−</button><output id="quantity" aria-live="polite">1</output><button id="qty-plus" type="button" aria-label="Increase quantity">+</button></div></div>
+            <details class="topping-picker" id="topping-picker">
+              <summary class="button button-outline topping-button">Topping <span id="topping-summary">Choose extras</span><span class="topping-chevron" aria-hidden="true"></span></summary>
+              <div class="topping-panel">
+                <h4>Choose your toppings</h4>
+                <p>£1.00 per extra, per pizza. Choose No, x1 or x2.</p>
+                <div id="topping-list" class="topping-list"></div>
+              </div>
+            </details>
             <button class="button button-primary add-button" id="add-to-basket" type="button"><span>Add to basket</span><span id="add-price">£10.00</span></button>
             <p class="order-footnote">Pre-order by phone. Online payment is not yet enabled.</p>
           </aside>
